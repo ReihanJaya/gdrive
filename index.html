@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Google Drive CRUD</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+  <style>
+    body {
+      background-color: #f1f3f4;
+    }
+    .folder-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .folder-card {
+      width: 160px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      text-align: center;
+      padding: 15px;
+      transition: transform 0.3s ease;
+    }
+    .folder-card:hover {
+      transform: scale(1.07);
+    }
+    .folder-icon {
+      font-size: 40px;
+      color: #fbbc04;
+    }
+    .folder-name {
+      font-weight: 500;
+      margin-top: 10px;
+    }
+    .folder-actions {
+      margin-top: 10px;
+    }
+    .btn-sm {
+      margin: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div id="Drive"></div>
+
+  <script type="text/babel">
+    function GoogleDriveUI() {
+      const [folderName, setFolderName] = React.useState('');
+      const [folders, setFolders] = React.useState([]);
+      const [editingId, setEditingId] = React.useState(null);
+      const [editingName, setEditingName] = React.useState('');
+
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        if (folderName.trim()) {
+          const newFolder = {
+            id: Date.now(),
+            name: folderName
+          };
+          setFolders([...folders, newFolder]);
+          setFolderName('');
+        }
+      };
+
+      const handleDelete = (id) => {
+        setFolders(folders.filter(folder => folder.id !== id));
+      };
+
+      const handleEdit = (id, name) => {
+        setEditingId(id);
+        setEditingName(name);
+      };
+
+     
+      const handleUpdate = (id) => {
+        setFolders(
+          folders.map(folder => 
+            folder.id === id ? { ...folder, name: editingName } : folder
+          )
+        );
+        setEditingId(null);
+        setEditingName('');
+      };
+
+      return (
+        <div className="container py-5">
+          <div className="text-center mb-4">
+            <h2><strong>Google Drive - CRUD</strong></h2>
+          </div>
+
+          <form className="row g-2 justify-content-center" onSubmit={handleSubmit}>
+            <div className="col-auto">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Masukkan nama folder"
+                value={folderName}
+                onChange={(e) => setFolderName(e.target.value)}
+              />
+            </div>
+            <div className="col-auto">
+              <button type="submit" className="btn btn-primary">+ Buat Folder</button>
+            </div>
+          </form>
+
+          <div className="folder-grid">
+            {folders.map(folder => (
+              <div className="folder-card" key={folder.id}>
+                <div className="folder-icon">📁</div>
+
+                {editingId === folder.id ? (
+                  <>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={editingName}
+                      onChange={(e) => setEditingName(e.target.value)}
+                    />
+                    <div className="folder-actions">
+                      <button className="btn btn-sm btn-success" onClick={() => handleUpdate(folder.id)}>Simpan</button>
+                      <button className="btn btn-sm btn-secondary" onClick={() => setEditingId(null)}>Batal</button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="folder-name">{folder.name}</div>
+                    <div className="folder-actions">
+                      <button className="btn btn-sm btn-outline-primary" onClick={() => handleEdit(folder.id, folder.name)}>Edit</button>
+                      <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(folder.id)}>Hapus</button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('Drive'));
+    root.render(<GoogleDriveUI />);
+  </script>
+</body>
+</html>
